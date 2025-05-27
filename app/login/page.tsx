@@ -24,7 +24,7 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem('userRole', data.role); // 儲存使用者角色
+      
       if (data.role === 'admin') {
         router.push('/admin');
       } else if (data.role === 'user') {
