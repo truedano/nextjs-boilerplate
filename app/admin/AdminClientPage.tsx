@@ -1,11 +1,25 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function AdminClientPage() {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const res = await fetch('/api/logout', {
+      method: 'POST',
+    });
+
+    if (res.ok) {
+      router.push('/login');
+    } else {
+      setMessage('登出失敗');
+    }
+  };
 
   const handleUpdateAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +73,22 @@ export default function AdminClientPage() {
           </button>
         </form>
         {message && <p style={{ marginTop: '15px', color: message.includes('失敗') ? 'red' : 'green' }}>{message}</p>}
+        <button
+          onClick={handleLogout}
+          style={{
+            padding: '10px',
+            borderRadius: '4px',
+            border: 'none',
+            backgroundColor: '#dc3545',
+            color: '#fff',
+            fontSize: '16px',
+            cursor: 'pointer',
+            marginTop: '20px',
+            width: '100%'
+          }}
+        >
+          登出
+        </button>
       </div>
     </div>
   );
