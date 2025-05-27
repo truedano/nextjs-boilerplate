@@ -24,9 +24,13 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 保護根路徑，如果未登入則導向登入頁面
+  // 處理根路徑的導向邏輯
   if (pathname === '/') {
-    if (!role) { // 如果沒有任何角色 cookie，表示未登入
+    if (role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    } else if (role === 'user') {
+      return NextResponse.redirect(new URL('/users', request.url));
+    } else { // 如果沒有任何角色 cookie，表示未登入
       return NextResponse.redirect(new URL('/login', request.url));
     }
   }

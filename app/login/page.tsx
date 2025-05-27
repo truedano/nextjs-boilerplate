@@ -24,9 +24,13 @@ export default function LoginPage() {
     const data = await res.json();
 
     if (res.ok) {
-      if (data.redirect === '/admin') {
+      localStorage.setItem('userRole', data.role); // 儲存使用者角色
+      if (data.role === 'admin') {
         router.push('/admin');
-      } else if (data.redirect === '/users') {
+      } else if (data.role === 'user') {
+        router.push('/users');
+      } else {
+        // 如果沒有明確的角色，預設導向到 /users
         router.push('/users');
       }
     } else {

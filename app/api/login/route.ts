@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
     // 驗證管理員
     if (username === adminData.username && password === adminData.password) {
-      const response = NextResponse.json({ message: '管理員登入成功', redirect: '/admin' });
+      const response = NextResponse.json({ message: '管理員登入成功', role: 'admin', redirect: '/admin' });
       response.cookies.set('role', 'admin', { path: '/', httpOnly: true });
       return response;
     }
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     // 驗證一般使用者
     const user = usersData.find((u: any) => u.username === username && u.password === password);
     if (user) {
-      const response = NextResponse.json({ message: '使用者登入成功', redirect: '/users' });
+      const response = NextResponse.json({ message: '使用者登入成功', role: 'user', redirect: '/users' });
       response.cookies.set('role', 'user', { path: '/', httpOnly: true });
       return response;
     }
