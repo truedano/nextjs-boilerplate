@@ -1,22 +1,43 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcrypt';
+import { PrismaClient } from '@prisma/client';
 
-export async function POST(request: Request) {
-  const { username, password } = await request.json();
+const prisma = new PrismaClient();
 
-  const adminPath = path.join(process.cwd(), 'data', 'admin.json');
+export async function POST(request: NextRequest) {
+  const { password } = await request.json();
 
   try {
-    // 這裡可以實作身份驗證，確保只有已登入的管理員才能更新
-    // 為了簡化，目前假設請求來自已驗證的管理員頁面
+    // 身份驗證檢查：確保使用者已登入且具有管理員角色
+    const role = request.cookies.get('role')?.value;
 
-    const newAdminData = { username, password };
-    fs.writeFileSync(adminPath, JSON.stringify(newAdminData, null, 2), 'utf-8');
+    if (!role || role !== 'admin') {
+      return NextResponse.json({ message: '未經授權' }, { status: 403 });
+    }
 
-    return NextResponse.json({ message: '管理員憑證更新成功' });
+    // 對新密碼進行雜湊處理
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 找到 role 為 'admin' 的使用者
+    const adminUser = await prisma.user.findFirst({
+      where: { role: 'admin' },
+    });
+
+    if (!adminUser) {
+      return NextResponse.json({ message: '找不到管理員使用者' }, { status: 404 });
+    }
+
+    // 使用 Prisma 更新資料庫，找到該管理員並更新其 passwordHash
+    await prisma.user.update({
+      where: { id: adminUser.id }, // 使用找到的管理員的 id 進行更新
+      data: { passwordHash: hashedPassword },
+    });
+
+    return NextResponse.json({ message: '管理員密碼更新成功' });
   } catch (error) {
-    console.error('更新管理員憑證錯誤:', error);
-    return NextResponse.json({ message: '伺服器錯誤，無法更新憑證' }, { status: 500 });
+    console.error('更新管理員密碼錯誤:', error);
+    return NextResponse.json({ message: '伺服器錯誤，無法更新密碼' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect();
   }
 }

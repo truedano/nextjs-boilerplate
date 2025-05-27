@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AdminClientPage() {
-  const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const router = useRouter();
 
@@ -25,12 +25,17 @@ export default function AdminClientPage() {
     e.preventDefault();
     setMessage('');
 
+    if (newPassword !== confirmPassword) {
+      setMessage('新密碼與確認密碼不一致');
+      return;
+    }
+
     const res = await fetch('/api/admin/update', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ username: newUsername, password: newPassword }),
+      body: JSON.stringify({ password: newPassword }),
     });
 
     const data = await res.json();
@@ -50,18 +55,18 @@ export default function AdminClientPage() {
 
         <form onSubmit={handleUpdateAdmin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <input
-            type="text"
-            placeholder="新使用者名稱"
-            value={newUsername}
-            onChange={(e) => setNewUsername(e.target.value)}
+            type="password"
+            placeholder="新密碼"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
             style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '16px' }}
             required
           />
           <input
             type="password"
-            placeholder="新密碼"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="確認新密碼"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '16px' }}
             required
           />
