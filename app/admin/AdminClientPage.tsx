@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import AdminSidebar from './AdminSidebar';
+import ActivityManagementPage from './ActivityManagementPage';
 
 export default function AdminClientPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [activeContent, setActiveContent] = useState<'activity' | 'settings'>('settings'); // 預設顯示設定頁面
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -48,52 +51,60 @@ export default function AdminClientPage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
-      <div style={{ padding: '40px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', backgroundColor: '#fff', width: '400px', textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '20px', color: '#333' }}>管理員頁面</h1>
-        <p style={{ marginBottom: '30px', color: '#555' }}>歡迎，管理員！您可以在此修改管理員憑證。</p>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
+      <AdminSidebar onMenuItemClick={setActiveContent} activeItem={activeContent} />
+      <div style={{ marginLeft: '200px', flexGrow: 1, padding: '20px' }}>
+        {activeContent === 'activity' && <ActivityManagementPage />}
+        {activeContent === 'settings' && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 40px)', backgroundColor: '#f0f2f5' }}>
+            <div style={{ padding: '40px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', backgroundColor: '#fff', width: '400px', textAlign: 'center' }}>
+              <h1 style={{ marginBottom: '20px', color: '#333' }}>管理員頁面</h1>
+              <p style={{ marginBottom: '30px', color: '#555' }}>歡迎，管理員！您可以在此修改管理員憑證。</p>
 
-        <form onSubmit={handleUpdateAdmin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <input
-            type="password"
-            placeholder="新密碼"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '16px' }}
-            required
-          />
-          <input
-            type="password"
-            placeholder="確認新密碼"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '16px' }}
-            required
-          />
-          <button
-            type="submit"
-            style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#28a745', color: '#fff', fontSize: '16px', cursor: 'pointer' }}
-          >
-            更新管理員憑證
-          </button>
-        </form>
-        {message && <p style={{ marginTop: '15px', color: message.includes('失敗') ? 'red' : 'green' }}>{message}</p>}
-        <button
-          onClick={handleLogout}
-          style={{
-            padding: '10px',
-            borderRadius: '4px',
-            border: 'none',
-            backgroundColor: '#dc3545',
-            color: '#fff',
-            fontSize: '16px',
-            cursor: 'pointer',
-            marginTop: '20px',
-            width: '100%'
-          }}
-        >
-          登出
-        </button>
+              <form onSubmit={handleUpdateAdmin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <input
+                  type="password"
+                  placeholder="新密碼"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '16px' }}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="確認新密碼"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd', fontSize: '16px' }}
+                  required
+                />
+                <button
+                  type="submit"
+                  style={{ padding: '10px', borderRadius: '4px', border: 'none', backgroundColor: '#28a745', color: '#fff', fontSize: '16px', cursor: 'pointer' }}
+                >
+                  更新管理員憑證
+                </button>
+              </form>
+              {message && <p style={{ marginTop: '15px', color: message.includes('失敗') ? 'red' : 'green' }}>{message}</p>}
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: '10px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  backgroundColor: '#dc3545',
+                  color: '#fff',
+                  fontSize: '16px',
+                  cursor: 'pointer',
+                  marginTop: '20px',
+                  width: '100%'
+                }}
+              >
+                登出
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
