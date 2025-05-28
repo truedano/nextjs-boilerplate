@@ -20,7 +20,7 @@ model User {
 }
 
 model Activity {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
   name        String
   description String?
   date        DateTime

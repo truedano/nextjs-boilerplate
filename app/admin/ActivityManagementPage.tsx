@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ActivityField {
   id: string;
@@ -25,7 +26,7 @@ export default function ActivityManagementPage() {
     setFields([
       ...fields,
       {
-        id: Date.now().toString(),
+        id: `${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}${new Date().getHours().toString().padStart(2, '0')}${new Date().getMinutes().toString().padStart(2, '0')}-${uuidv4()}`,
         name: '',
         type: 'string',
         content: '',

@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       if (activityId) {
         // 如果提供了活動 ID，則更新現有活動
         activity = await prisma.activity.update({
-          where: { id: parseInt(activityId, 10) }, // 將字串 ID 轉換為整數
+          where: { id: activityId },
           data: {
             customFields: activityFields,
           },
@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
         // 如果沒有提供活動 ID，則創建一個新的活動
         activity = await prisma.activity.create({
           data: {
+            id: activityId, // 使用前端傳遞的 activityId 作為 id
             name: '新活動', // 為新活動提供一個預設名稱
             description: '這是透過活動管理頁面創建的新活動',
             date: new Date(), // 預設為當前日期時間
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
 
       try {
         await prisma.activity.delete({
-          where: { id: parseInt(activityId, 10) },
+          where: { id: activityId },
         });
         return NextResponse.json({ message: '活動刪除成功' });
       } catch (deleteError: any) {
