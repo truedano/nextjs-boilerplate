@@ -7,6 +7,7 @@ import ActivityManagementPage from './ActivityManagementPage';
 import { FaBars } from 'react-icons/fa'; // 引入漢堡菜單圖標
 
 export default function AdminClientPage() {
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -30,6 +31,11 @@ export default function AdminClientPage() {
     e.preventDefault();
     setMessage('');
 
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      setMessage('所有密碼欄位都必須填寫');
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setMessage('新密碼與確認密碼不一致');
       return;
@@ -40,13 +46,16 @@ export default function AdminClientPage() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ password: newPassword }),
+      body: JSON.stringify({ oldPassword, newPassword }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
       setMessage(data.message);
+      setOldPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
     } else {
       setMessage(data.message || '更新失敗');
     }
@@ -77,16 +86,30 @@ export default function AdminClientPage() {
               <p className="mb-8 text-gray-600">歡迎，管理員！您可以在此修改管理員憑證。</p>
 
               <form onSubmit={handleUpdateAdmin} className="flex flex-col gap-4">
+                <label htmlFor="oldPassword" className="sr-only">舊密碼:</label>
                 <input
                   type="password"
+                  id="oldPassword"
+                  placeholder="舊密碼"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="p-3 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <label htmlFor="newPassword" className="sr-only">新密碼:</label>
+                <input
+                  type="password"
+                  id="newPassword"
                   placeholder="新密碼"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   className="p-3 rounded-md border border-gray-300 text-base focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
+                <label htmlFor="confirmNewPassword" className="sr-only">確認新密碼:</label>
                 <input
                   type="password"
+                  id="confirmNewPassword"
                   placeholder="確認新密碼"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}

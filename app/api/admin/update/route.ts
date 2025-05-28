@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
-  const { password } = await request.json();
+  const { oldPassword, newPassword } = await request.json();
 
   try {
     // 身份驗證檢查：確保使用者已登入且具有管理員角色
@@ -16,8 +16,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 對新密碼進行雜湊處理
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     // 找到 role 為 'admin' 的使用者
     const adminUser = await prisma.user.findFirst({
       where: { role: 'admin' },
@@ -26,6 +24,15 @@ export async function POST(request: NextRequest) {
     if (!adminUser) {
       return NextResponse.json({ message: '找不到管理員使用者' }, { status: 404 });
     }
+
+    // 驗證舊密碼
+    const isPasswordCorrect = await bcrypt.compare(oldPassword, adminUser.passwordHash);
+    if (!isPasswordCorrect) {
+        return NextResponse.json({ message: '舊密碼不正確' }, { status: 401 });
+    }
+
+    // 對新密碼進行雜湊處理
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // 使用 Prisma 更新資料庫，找到該管理員並更新其 passwordHash
     await prisma.user.update({
