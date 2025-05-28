@@ -99,6 +99,7 @@ export default function ActivityManagementPage() {
 
       if (response.ok) {
         alert('活動欄位資料已成功保存！');
+        fetchActivities(); // 重新載入活動列表
       } else {
         const errorData = await response.json();
         alert(`保存失敗: ${errorData.message || response.statusText}`);
