@@ -49,10 +49,53 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ message: '管理員密碼更新成功' });
 
-    } else if (action === 'updateActivityFields') {
-      const { activityFields } = body;
+    } else if (action === 'createActivity') {
+      const { activityFields, activityId } = body;
 
-      // 資料驗證
+      if (!Array.isArray(activityFields)) {
+        return NextResponse.json({ message: 'activityFields 必須是一個陣列' }, { status: 400 });
+      }
+      if (!activityId) {
+        return NextResponse.json({ message: '缺少活動 ID' }, { status: 400 });
+      }
+
+      for (const field of activityFields) {
+        if (
+          typeof field.name !== 'string' ||
+          typeof field.type !== 'string' ||
+          typeof field.content !== 'string'
+        ) {
+          return NextResponse.json(
+            { message: '每個活動欄位物件必須包含 name (字串), type (字串) 和 content (字串)' },
+            { status: 400 }
+          );
+        }
+      }
+
+      try {
+        const newActivity = await prisma.activity.create({
+          data: {
+            id: activityId,
+            name: activityFields.find((f: any) => f.name === '活動名稱')?.content || '新活動',
+            description: activityFields.find((f: any) => f.name === '活動描述')?.content || '這是透過活動管理頁面創建的新活動',
+            date: new Date(activityFields.find((f: any) => f.name === '活動日期開始')?.content || new Date()),
+            location: activityFields.find((f: any) => f.name === '活動地點')?.content || '線上',
+            customFields: activityFields,
+          },
+        });
+        console.log('新活動已創建:', newActivity);
+        return NextResponse.json({ message: '活動創建成功', activity: newActivity });
+      } catch (createError: any) {
+        console.error('創建活動錯誤:', createError);
+        return NextResponse.json({ message: '創建活動失敗' }, { status: 500 });
+      }
+
+    } else if (action === 'updateExistingActivity') {
+      const { activityId, activityFields } = body;
+
+      if (!activityId) {
+        return NextResponse.json({ message: '缺少活動 ID' }, { status: 400 });
+      }
       if (!Array.isArray(activityFields)) {
         return NextResponse.json({ message: 'activityFields 必須是一個陣列' }, { status: 400 });
       }
@@ -70,40 +113,26 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // 將活動欄位資料儲存到資料庫
-      // 這裡假設我們只有一個活動，或者我們總是更新/創建一個預設的活動
-      // 如果前端傳送了活動 ID，則可以根據 ID 更新
-      // 為了簡化，如果沒有提供活動 ID，我們將創建一個新的活動
-      // 或者更新一個預設的活動（例如 ID 為 1 的活動）
-
-      const { activityId } = body; // 從前端獲取活動 ID
-
-      let activity;
-      if (activityId) {
-        // 如果提供了活動 ID，則更新現有活動
-        activity = await prisma.activity.update({
+      try {
+        const updatedActivity = await prisma.activity.update({
           where: { id: activityId },
           data: {
+            name: activityFields.find((f: any) => f.name === '活動名稱')?.content || '更新活動',
+            description: activityFields.find((f: any) => f.name === '活動描述')?.content || '這是透過活動管理頁面更新的活動',
+            date: new Date(activityFields.find((f: any) => f.name === '活動日期開始')?.content || new Date()),
+            location: activityFields.find((f: any) => f.name === '活動地點')?.content || '線上',
             customFields: activityFields,
           },
         });
-      } else {
-        // 如果沒有提供活動 ID，則創建一個新的活動
-        activity = await prisma.activity.create({
-          data: {
-            id: activityId, // 使用前端傳遞的 activityId 作為 id
-            name: '新活動', // 為新活動提供一個預設名稱
-            description: '這是透過活動管理頁面創建的新活動',
-            date: new Date(), // 預設為當前日期時間
-            location: '線上',
-            customFields: activityFields,
-          },
-        });
+        console.log('活動已更新:', updatedActivity);
+        return NextResponse.json({ message: '活動更新成功', activity: updatedActivity });
+      } catch (updateError: any) {
+        if (updateError.code === 'P2025') {
+          return NextResponse.json({ message: '找不到要更新的活動' }, { status: 404 });
+        }
+        console.error('更新活動錯誤:', updateError);
+        return NextResponse.json({ message: '更新活動失敗' }, { status: 500 });
       }
-
-      console.log('活動欄位資料已儲存/更新:', activity);
-
-      return NextResponse.json({ message: '活動欄位資料更新成功', activity });
 
     } else if (action === 'deleteActivity') {
       const { activityId } = body;
