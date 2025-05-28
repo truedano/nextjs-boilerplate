@@ -145,7 +145,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: '未經授權' }, { status: 403 });
     }
 
-    const activities = await prisma.activity.findMany();
+    const activities = await prisma.activity.findMany({
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
     return NextResponse.json(activities);
   } catch (error) {
     console.error('處理 GET 活動請求錯誤:', error);
