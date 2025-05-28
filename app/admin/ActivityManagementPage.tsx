@@ -258,10 +258,9 @@ export default function ActivityManagementPage() {
           {activities.map((activity) => (
             <li key={activity.id} className="p-4 border border-gray-200 rounded-md bg-gray-50 flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-semibold text-gray-700">{activity.name}</h3>
+                <h3 className="text-xl font-semibold text-gray-700">活動ID: {activity.id}</h3>
                 {activity.customFields && activity.customFields.length > 0 && (
                   <div className="mt-2 text-gray-600">
-                    <p className="font-medium">自訂欄位:</p>
                     <ul className="list-disc list-inside ml-4">
                       {activity.customFields.map((field, idx) => (
                         <li key={idx}>
