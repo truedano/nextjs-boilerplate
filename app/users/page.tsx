@@ -54,43 +54,30 @@ export default function UsersPage() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f0f2f5', padding: '20px' }}>
-      <div style={{ padding: '40px', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)', backgroundColor: '#fff', width: '80%', maxWidth: '800px', textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '20px', color: '#333' }}>使用者頁面</h1>
-        <p style={{ color: '#555', marginBottom: '30px' }}>歡迎，一般使用者！</p>
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-5xl bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-md text-center">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800">使用者頁面</h1>
+        <p className="text-gray-600 mb-6 text-base sm:text-lg">歡迎，一般使用者！</p>
 
-        <h2 style={{ marginBottom: '20px', color: '#333' }}>現有活動</h2>
-        {loading && <p>載入活動中...</p>}
-        {error && <p style={{ color: 'red' }}>載入活動失敗：{error}</p>}
-        {!loading && !error && activities.length === 0 && <p>目前沒有可用的活動。</p>}
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4 text-gray-800">現有活動</h2>
+        {loading && <p className="text-gray-700">載入活動中...</p>}
+        {error && <p className="text-red-500">載入活動失敗：{error}</p>}
+        {!loading && !error && activities.length === 0 && <p className="text-gray-700">目前沒有可用的活動。</p>}
         {!loading && !error && activities.length > 0 && (
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+          <ul className="list-none p-0">
             {activities.map((activity) => (
-              <li key={activity.id} style={{
-                border: '1px solid #ddd',
-                borderRadius: '5px',
-                padding: '15px',
-                marginBottom: '15px',
-                textAlign: 'left',
-                backgroundColor: '#f9f9f9'
-              }}>
-                <h3 style={{ margin: '0 0 10px 0', color: '#007bff' }}>{activity.name}</h3>
+              <li key={activity.id} className="border border-gray-300 rounded-md p-4 mb-4 text-left bg-gray-50 shadow-sm">
+                <h3 className="text-lg sm:text-xl font-medium mb-2 text-blue-600">{activity.name}</h3>
                 {activity.customFields && Object.keys(activity.customFields).length > 0 && (
-                  <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+                  <div className="mt-3 pt-3 border-t border-gray-200">
                     {Object.entries(activity.customFields).map(([key, customField]) => (
-                      <div key={key} style={{ margin: '0 0 5px 0', color: '#777', fontSize: '0.9em' }}>
+                      <div key={key} className="mb-1 text-gray-700 text-sm sm:text-base">
                         <strong>{customField.name}:</strong>
                         {customField.type === 'user_input' ? (
                           <input
                             type="text"
                             placeholder={`請輸入${customField.name}`}
-                            style={{
-                              marginLeft: '10px',
-                              padding: '5px',
-                              borderRadius: '3px',
-                              border: '1px solid #ccc',
-                              width: 'calc(100% - 120px)'
-                            }}
+                            className="ml-2 p-1 border border-gray-300 rounded-sm w-full sm:w-auto max-w-xs"
                           />
                         ) : (
                           <span> {customField.content}</span>
@@ -99,7 +86,7 @@ export default function UsersPage() {
                     ))}
                   </div>
                 )}
-                <p style={{ margin: '10px 0 0 0', color: '#888', fontSize: '0.9em' }}>報名截止日期: {new Date(activity.registrationEndDate).toLocaleString()}</p>
+                <p className="mt-3 text-gray-600 text-xs sm:text-sm">報名截止日期: {new Date(activity.registrationEndDate).toLocaleString()}</p>
               </li>
             ))}
           </ul>
@@ -107,16 +94,7 @@ export default function UsersPage() {
 
         <button
           onClick={handleLogout}
-          style={{
-            marginTop: '30px',
-            padding: '10px 20px',
-            backgroundColor: '#dc3545',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}
+          className="mt-6 px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 text-base sm:text-lg"
         >
           登出
         </button>
