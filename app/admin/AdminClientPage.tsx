@@ -46,7 +46,7 @@ export default function AdminClientPage() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ oldPassword, newPassword }),
+      body: JSON.stringify({ action: 'updatePassword', oldPassword, newPassword }),
     });
 
     const data = await res.json();
