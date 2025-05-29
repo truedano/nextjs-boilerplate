@@ -50,16 +50,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: '管理員密碼更新成功' });
 
     } else if (action === 'createActivity') {
-      const { activityFields, activityId } = body;
+      const { activityId, name, registrationEndDate } = body;
+      const activityCustomFields = body.customFields; // 明確從 body 中存取 customFields
+      console.log('Received body for createActivity:', body);
+      console.log('Type of activityCustomFields:', typeof activityCustomFields, 'Is Array:', Array.isArray(activityCustomFields));
 
-      if (!Array.isArray(activityFields)) {
+      if (!Array.isArray(activityCustomFields)) {
         return NextResponse.json({ message: 'activityFields 必須是一個陣列' }, { status: 400 });
       }
       if (!activityId) {
         return NextResponse.json({ message: '缺少活動 ID' }, { status: 400 });
       }
 
-      for (const field of activityFields) {
+      for (const field of activityCustomFields) {
         if (
           typeof field.name !== 'string' ||
           typeof field.type !== 'string' ||
@@ -76,11 +79,12 @@ export async function POST(request: NextRequest) {
         const newActivity = await prisma.activity.create({
           data: {
             id: activityId,
-            name: activityFields.find((f: any) => f.name === '活動名稱')?.content || '新活動',
-            description: activityFields.find((f: any) => f.name === '活動描述')?.content || '這是透過活動管理頁面創建的新活動',
-            date: new Date(activityFields.find((f: any) => f.name === '活動日期開始')?.content || new Date()),
-            location: activityFields.find((f: any) => f.name === '活動地點')?.content || '線上',
-            customFields: activityFields,
+            name: name,
+            registrationEndDate: new Date(registrationEndDate), // 新增報名截止日
+            description: activityCustomFields.find((f: any) => f.name === '活動描述')?.content || '這是透過活動管理頁面創建的新活動',
+            date: new Date(activityCustomFields.find((f: any) => f.name === '活動日期開始')?.content || new Date()),
+            location: activityCustomFields.find((f: any) => f.name === '活動地點')?.content || '線上',
+            customFields: activityCustomFields,
           },
         });
         console.log('新活動已創建:', newActivity);
@@ -91,16 +95,17 @@ export async function POST(request: NextRequest) {
       }
 
     } else if (action === 'updateExistingActivity') {
-      const { activityId, activityFields } = body;
+      const { activityId, name, registrationEndDate } = body;
+      const activityCustomFields = body.customFields; // 明確從 body 中存取 customFields
 
       if (!activityId) {
         return NextResponse.json({ message: '缺少活動 ID' }, { status: 400 });
       }
-      if (!Array.isArray(activityFields)) {
+      if (!Array.isArray(activityCustomFields)) {
         return NextResponse.json({ message: 'activityFields 必須是一個陣列' }, { status: 400 });
       }
 
-      for (const field of activityFields) {
+      for (const field of activityCustomFields) {
         if (
           typeof field.name !== 'string' ||
           typeof field.type !== 'string' ||
@@ -117,11 +122,12 @@ export async function POST(request: NextRequest) {
         const updatedActivity = await prisma.activity.update({
           where: { id: activityId },
           data: {
-            name: activityFields.find((f: any) => f.name === '活動名稱')?.content || '更新活動',
-            description: activityFields.find((f: any) => f.name === '活動描述')?.content || '這是透過活動管理頁面更新的活動',
-            date: new Date(activityFields.find((f: any) => f.name === '活動日期開始')?.content || new Date()),
-            location: activityFields.find((f: any) => f.name === '活動地點')?.content || '線上',
-            customFields: activityFields,
+            name: name,
+            registrationEndDate: new Date(registrationEndDate), // 更新報名截止日
+            description: activityCustomFields.find((f: any) => f.name === '活動描述')?.content || '這是透過活動管理頁面更新的活動',
+            date: new Date(activityCustomFields.find((f: any) => f.name === '活動日期開始')?.content || new Date()),
+            location: activityCustomFields.find((f: any) => f.name === '活動地點')?.content || '線上',
+            customFields: activityCustomFields,
           },
         });
         console.log('活動已更新:', updatedActivity);

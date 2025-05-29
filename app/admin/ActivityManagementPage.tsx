@@ -13,16 +13,21 @@ interface ActivityField {
 interface Activity {
   id: string;
   name: string;
+  registrationEndDate: string; // 新增活動報名截止日
   customFields: ActivityField[];
 }
 
 export default function ActivityManagementPage() {
   const [newActivityFields, setNewActivityFields] = useState<ActivityField[]>([]);
+  const [newActivityName, setNewActivityName] = useState<string>(''); // 新增活動名稱狀態
+  const [newActivityRegistrationEndDate, setNewActivityRegistrationEndDate] = useState<string>(''); // 新增活動報名截止日狀態
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [editingActivityFields, setEditingActivityFields] = useState<ActivityField[]>([]);
+  const [editingActivityName, setEditingActivityName] = useState<string>(''); // 編輯活動名稱狀態
+  const [editingActivityRegistrationEndDate, setEditingActivityRegistrationEndDate] = useState<string>(''); // 編輯活動報名截止日狀態
 
   const addNewField = () => {
     setNewActivityFields([
@@ -82,6 +87,15 @@ export default function ActivityManagementPage() {
     }
   };
 
+  const formatDateTimeLocal = (date: Date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
   // Fetch activities on component mount
   useEffect(() => {
     fetchActivities();
@@ -89,11 +103,15 @@ export default function ActivityManagementPage() {
 
   const handleEditActivity = (activity: Activity) => {
     setEditingActivity(activity);
+    setEditingActivityName(activity.name); // 設定編輯活動名稱
+    setEditingActivityRegistrationEndDate(formatDateTimeLocal(new Date(activity.registrationEndDate))); // 設定編輯活動報名截止日
     setEditingActivityFields([...activity.customFields]);
   };
 
   const handleCancelEdit = () => {
     setEditingActivity(null);
+    setEditingActivityName('');
+    setEditingActivityRegistrationEndDate('');
     setEditingActivityFields([]);
   };
 
@@ -113,17 +131,22 @@ export default function ActivityManagementPage() {
         body: JSON.stringify({
           action: 'createActivity',
           activityId: uuidv4(), // 為新活動生成一個唯一的 ID
-          activityFields: newActivityFields,
+          name: newActivityName, // 新增活動名稱
+          registrationEndDate: newActivityRegistrationEndDate, // 新增活動報名截止日
+          customFields: newActivityFields,
         }),
       });
 
       if (response.ok) {
         alert('新活動已成功創建！');
+        setNewActivityName(''); // 清空活動名稱
+        setNewActivityRegistrationEndDate(''); // 清空活動報名截止日
         setNewActivityFields([]); // 清空欄位以便新增
         fetchActivities(); // 重新載入活動列表
       } else {
         const errorData = await response.json();
         alert(`創建失敗: ${errorData.message || response.statusText}`);
+        console.error('創建失敗:', errorData);
       }
     } catch (error) {
       console.error('創建新活動時發生錯誤:', error);
@@ -141,7 +164,9 @@ export default function ActivityManagementPage() {
         body: JSON.stringify({
           action: 'updateExistingActivity',
           activityId: activityId,
-          activityFields: editingActivityFields,
+          name: editingActivityName, // 更新活動名稱
+          registrationEndDate: editingActivityRegistrationEndDate, // 更新活動報名截止日
+          customFields: editingActivityFields,
         }),
       });
 
@@ -194,13 +219,40 @@ export default function ActivityManagementPage() {
     <div className="p-5 bg-white rounded-lg shadow-md">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">活動管理頁面</h1>
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">新增活動欄位</h2>
-      <button
-        onClick={addNewField}
-        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
-      >
-        新增活動欄位
-      </button>
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">新增活動</h2>
+      <div className="mb-6 p-4 border border-gray-200 rounded-md bg-gray-50">
+        <div className="mb-4">
+          <label htmlFor="new-activity-name" className="block text-sm font-medium text-gray-700 mb-1">
+            活動名稱:
+          </label>
+          <input
+            type="text"
+            id="new-activity-name"
+            value={newActivityName}
+            onChange={(e) => setNewActivityName(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="輸入活動名稱"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="new-activity-registration-end-date" className="block text-sm font-medium text-gray-700 mb-1">
+            報名截止日:
+          </label>
+          <input
+            type="datetime-local"
+            id="new-activity-registration-end-date"
+            value={newActivityRegistrationEndDate}
+            onChange={(e) => setNewActivityRegistrationEndDate(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        <button
+          onClick={addNewField}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+        >
+          新增自訂欄位
+        </button>
+      </div>
 
       <div className="space-y-6">
         {newActivityFields.map((field, index) => (
@@ -289,7 +341,7 @@ export default function ActivityManagementPage() {
         ))}
       </div>
 
-      {newActivityFields.length > 0 && (
+      {(newActivityName || newActivityFields.length > 0) && (
         <button
           onClick={handleCreateActivity}
           className="mt-8 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200 w-full"
@@ -310,9 +362,11 @@ export default function ActivityManagementPage() {
             <li key={activity.id} className="p-4 border border-gray-200 rounded-md bg-gray-50">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-700">活動ID: {activity.id}</h3>
+                  <h3 className="text-xl font-semibold text-gray-700">活動名稱: {activity.name}</h3>
+                  <p className="text-gray-600">報名截止日: {new Date(activity.registrationEndDate).toLocaleString()}</p>
                   {activity.customFields && activity.customFields.length > 0 && (
                     <div className="mt-2 text-gray-600">
+                      <h4 className="font-medium">自訂欄位:</h4>
                       <ul className="list-disc list-inside ml-4">
                         {activity.customFields.map((field, idx) => (
                           <li key={idx}>
@@ -341,28 +395,53 @@ export default function ActivityManagementPage() {
 
               {editingActivity?.id === activity.id && (
                 <div className="mt-6 p-4 border border-blue-300 rounded-md bg-blue-50">
-                  <h4 className="text-lg font-semibold text-blue-800 mb-4">編輯活動欄位: {activity.id}</h4>
+                  <h4 className="text-lg font-semibold text-blue-800 mb-4">編輯活動: {activity.name}</h4>
                   <div className="space-y-4">
+                    <div>
+                      <label htmlFor={`edit-activity-name-${activity.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                        活動名稱:
+                      </label>
+                      <input
+                        type="text"
+                        id={`edit-activity-name-${activity.id}`}
+                        value={editingActivityName}
+                        onChange={(e) => setEditingActivityName(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`edit-activity-registration-end-date-${activity.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                        報名截止日:
+                      </label>
+                      <input
+                        type="datetime-local"
+                        id={`edit-activity-registration-end-date-${activity.id}`}
+                        value={editingActivityRegistrationEndDate}
+                        onChange={(e) => setEditingActivityRegistrationEndDate(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <h5 className="text-md font-semibold text-blue-700 mt-4">自訂欄位:</h5>
                     {editingActivityFields.map((field, index) => (
                       <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <label htmlFor={`edit-name-${field.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor={`edit-field-name-${field.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                             欄位名稱:
                           </label>
                           <input
                             type="text"
-                            id={`edit-name-${field.id}`}
+                            id={`edit-field-name-${field.id}`}
                             value={field.name}
                             onChange={(e) => updateEditingField(field.id, 'name', e.target.value)}
                             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
-                          <label htmlFor={`edit-type-${field.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor={`edit-field-type-${field.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                             欄位類型:
                           </label>
                           <select
-                            id={`edit-type-${field.id}`}
+                            id={`edit-field-type-${field.id}`}
                             value={field.type}
                             onChange={(e) => updateEditingField(field.id, 'type', e.target.value as ActivityField['type'])}
                             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -373,12 +452,12 @@ export default function ActivityManagementPage() {
                           </select>
                         </div>
                         <div>
-                          <label htmlFor={`edit-content-${field.id}`} className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor={`edit-field-content-${field.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                             欄位內容:
                           </label>
                           <input
                             type={field.type === 'datetime_range' ? 'datetime-local' : 'text'}
-                            id={`edit-content-${field.id}`}
+                            id={`edit-field-content-${field.id}`}
                             value={field.content}
                             onChange={(e) => updateEditingField(field.id, 'content', e.target.value)}
                             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"

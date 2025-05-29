@@ -8,8 +8,8 @@
     *   ✅ 管理員介面 (透過 [`app/admin/AdminClientPage.tsx`](app/admin/AdminClientPage.tsx) 實現)
     *   ✅ 管理員側邊欄導航 (透過 [`app/admin/AdminSidebar.tsx`](app/admin/AdminSidebar.tsx) 實現)
     *   ✅ 活動管理頁面 (透過 [`app/admin/ActivityManagementPage.tsx`](app/admin/ActivityManagementPage.tsx) 實現)
-        *   ✅ 新增活動
-        *   ✅ 更新活動
+        *   ✅ 新增活動 (已包含報名截止日)
+        *   ✅ 更新活動 (已包含報名截止日)
         *   ✅ 刪除活動
         *   ✅ 管理活動自訂欄位 (新增、更新、移動)
     *   ✅ 管理員資訊更新 (透過 [`app/api/admin/update/route.ts`](app/api/admin/update/route.ts) 和 [`app/admin/AdminClientPage.tsx`](app/admin/AdminClientPage.tsx) 實現)
