@@ -7,7 +7,7 @@ interface Activity {
   id: string;
   name: string;
   description: string;
-  customFields: Record<string, { name: string; content: string }>;
+  customFields: Record<string, { name: string; type: string; content: string }>;
   registrationEndDate: string;
 }
 
@@ -78,9 +78,24 @@ export default function UsersPage() {
                 {activity.customFields && Object.keys(activity.customFields).length > 0 && (
                   <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
                     {Object.entries(activity.customFields).map(([key, customField]) => (
-                      <p key={key} style={{ margin: '0 0 3px 0', color: '#777', fontSize: '0.9em' }}>
-                        <strong>{customField.name}:</strong> {customField.content}
-                      </p>
+                      <div key={key} style={{ margin: '0 0 5px 0', color: '#777', fontSize: '0.9em' }}>
+                        <strong>{customField.name}:</strong>
+                        {customField.type === 'user_input' ? (
+                          <input
+                            type="text"
+                            placeholder={`請輸入${customField.name}`}
+                            style={{
+                              marginLeft: '10px',
+                              padding: '5px',
+                              borderRadius: '3px',
+                              border: '1px solid #ccc',
+                              width: 'calc(100% - 120px)'
+                            }}
+                          />
+                        ) : (
+                          <span> {customField.content}</span>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}

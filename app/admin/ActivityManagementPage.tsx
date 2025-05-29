@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 interface ActivityField {
   id: string;
   name: string;
-  type: 'string' | 'number' | 'datetime_range';
+  type: 'string' | 'number' | 'datetime_range' | 'user_input';
   content: string;
 }
 
@@ -333,6 +333,7 @@ export default function ActivityManagementPage() {
                   <option value="string">字串</option>
                   <option value="number">數字</option>
                   <option value="datetime_range">日期時間區間</option>
+                  <option value="user_input">使用者輸入</option>
                 </select>
               </div>
 
@@ -489,6 +490,7 @@ export default function ActivityManagementPage() {
                             <option value="string">字串</option>
                             <option value="number">數字</option>
                             <option value="datetime_range">日期時間區間</option>
+                            <option value="user_input">使用者輸入</option>
                           </select>
                         </div>
                         <div>
