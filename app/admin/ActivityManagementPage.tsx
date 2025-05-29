@@ -250,7 +250,7 @@ export default function ActivityManagementPage() {
           onClick={addNewField}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
         >
-          新增自訂欄位
+          新增欄位
         </button>
       </div>
 
@@ -366,7 +366,6 @@ export default function ActivityManagementPage() {
                   <p className="text-gray-600">報名截止日: {new Date(activity.registrationEndDate).toLocaleString()}</p>
                   {activity.customFields && activity.customFields.length > 0 && (
                     <div className="mt-2 text-gray-600">
-                      <h4 className="font-medium">自訂欄位:</h4>
                       <ul className="list-disc list-inside ml-4">
                         {activity.customFields.map((field, idx) => (
                           <li key={idx}>
@@ -421,7 +420,6 @@ export default function ActivityManagementPage() {
                         className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                    <h5 className="text-md font-semibold text-blue-700 mt-4">自訂欄位:</h5>
                     {editingActivityFields.map((field, index) => (
                       <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
