@@ -112,6 +112,7 @@ export default function ActivityManagementPage() {
         },
         body: JSON.stringify({
           action: 'createActivity',
+          activityId: uuidv4(), // 為新活動生成一個唯一的 ID
           activityFields: newActivityFields,
         }),
       });
