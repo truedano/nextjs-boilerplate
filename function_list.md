@@ -16,6 +16,9 @@
 
 *   **使用者功能**
     *   ✅ 使用者頁面 (透過 [`app/users/page.tsx`](app/users/page.tsx) 實現)
+    *   活動列表
+    *   活動報名
+    *   已報名活動列表
 
 *   **資料庫相關**
     *   ✅ Prisma ORM 設定 (透過 `prisma/schema.prisma` 實現)
