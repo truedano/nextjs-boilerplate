@@ -11,7 +11,7 @@
         *   ✅ 新增活動 (已包含報名截止日)
         *   ✅ 更新活動 (已包含報名截止日)
         *   ✅ 刪除活動
-        *   ✅ 管理活動 (新增、更新、移動)
+        *   ✅ 管理活動 (新增、刪除、修改順序)
     *   ✅ 管理員資訊更新 (透過 [`app/api/admin/update/route.ts`](app/api/admin/update/route.ts) 和 [`app/admin/AdminClientPage.tsx`](app/admin/AdminClientPage.tsx) 實現)
 
 *   **使用者功能**
