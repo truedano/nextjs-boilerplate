@@ -51,16 +51,10 @@ export default function ActivityManagementPage() {
     setNewActivityFields(newActivityFields.filter((field) => field.id !== id));
   };
 
-  const moveNewField = (id: string, direction: 'up' | 'down') => {
-    const index = newActivityFields.findIndex((field) => field.id === id);
-    if (index === -1) return;
-
+  const moveNewField = (fromIndex: number, toIndex: number) => {
     const updatedFields = [...newActivityFields];
-    if (direction === 'up' && index > 0) {
-      [updatedFields[index - 1], updatedFields[index]] = [updatedFields[index], updatedFields[index - 1]];
-    } else if (direction === 'down' && index < updatedFields.length - 1) {
-      [updatedFields[index + 1], updatedFields[index]] = [updatedFields[index], updatedFields[index + 1]];
-    }
+    const [movedField] = updatedFields.splice(fromIndex, 1);
+    updatedFields.splice(toIndex, 0, movedField);
     setNewActivityFields(updatedFields);
   };
 
@@ -119,6 +113,29 @@ export default function ActivityManagementPage() {
     setEditingActivityFields(
       editingActivityFields.map((field) => (field.id === id ? { ...field, [key]: value } : field))
     );
+  };
+
+  const removeEditingField = (id: string) => {
+    setEditingActivityFields(editingActivityFields.filter((field) => field.id !== id));
+  };
+
+  const moveEditingField = (fromIndex: number, toIndex: number) => {
+    const updatedFields = [...editingActivityFields];
+    const [movedField] = updatedFields.splice(fromIndex, 1);
+    updatedFields.splice(toIndex, 0, movedField);
+    setEditingActivityFields(updatedFields);
+  };
+
+  const addEditingField = () => {
+    setEditingActivityFields([
+      ...editingActivityFields,
+      {
+        id: `${new Date().getFullYear()}${(new Date().getMonth() + 1).toString().padStart(2, '0')}${new Date().getDate().toString().padStart(2, '0')}${new Date().getHours().toString().padStart(2, '0')}${new Date().getMinutes().toString().padStart(2, '0')}-${uuidv4()}`,
+        name: '',
+        type: 'string',
+        content: '',
+      },
+    ]);
   };
 
   const handleCreateActivity = async () => {
@@ -262,7 +279,7 @@ export default function ActivityManagementPage() {
           >
             <div className="absolute top-2 right-2 flex space-x-2">
               <button
-                onClick={() => moveNewField(field.id, 'up')}
+                onClick={() => moveNewField(index, index - 1)}
                 disabled={index === 0}
                 className="p-1 bg-gray-300 rounded-full hover:bg-gray-400 disabled:opacity-50"
                 title="上移"
@@ -270,7 +287,7 @@ export default function ActivityManagementPage() {
                 ⬆️
               </button>
               <button
-                onClick={() => moveNewField(field.id, 'down')}
+                onClick={() => moveNewField(index, index + 1)}
                 disabled={index === newActivityFields.length - 1}
                 className="p-1 bg-gray-300 rounded-full hover:bg-gray-400 disabled:opacity-50"
                 title="下移"
@@ -421,7 +438,32 @@ export default function ActivityManagementPage() {
                       />
                     </div>
                     {editingActivityFields.map((field, index) => (
-                      <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div key={field.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 relative p-4 border border-gray-200 rounded-md bg-gray-50">
+                        <div className="absolute top-2 right-2 flex space-x-2">
+                          <button
+                            onClick={() => moveEditingField(index, index - 1)}
+                            disabled={index === 0}
+                            className="p-1 bg-gray-300 rounded-full hover:bg-gray-400 disabled:opacity-50"
+                            title="上移"
+                          >
+                            ⬆️
+                          </button>
+                          <button
+                            onClick={() => moveEditingField(index, index + 1)}
+                            disabled={index === editingActivityFields.length - 1}
+                            className="p-1 bg-gray-300 rounded-full hover:bg-gray-400 disabled:opacity-50"
+                            title="下移"
+                          >
+                            ⬇️
+                          </button>
+                          <button
+                            onClick={() => removeEditingField(field.id)}
+                            className="p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                            title="移除"
+                          >
+                            ❌
+                          </button>
+                        </div>
                         <div>
                           <label htmlFor={`edit-field-name-${field.id}`} className="block text-sm font-medium text-gray-700 mb-1">
                             欄位名稱:
@@ -464,6 +506,12 @@ export default function ActivityManagementPage() {
                       </div>
                     ))}
                   </div>
+                  <button
+                    onClick={addEditingField}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                  >
+                    新增欄位
+                  </button>
                   <div className="flex justify-end space-x-2 mt-4">
                     <button
                       onClick={() => handleUpdateActivity(activity.id)}
